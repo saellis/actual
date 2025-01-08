@@ -63,7 +63,6 @@ Some notes about the architecture of this setup:
     * `terraform login`
 10. Make the following updates to the following files in the repository:
     * Update `backend.tf` with your organization and workspace names from HCP Terraform.
-    * Update `main.tf` with your GCP project name for the "project" and "billing_project" parameters. You may have the same value for the "project" and "billing_project" parameters. You can optionally change the region and zone as well, but keep in mind [only certain regions are eligible for the always-free Compute Engine instance][3].
     * Create a file named `sensitive.auto.tfvars` and create the following variables:
         * actual_fqdn - The fully-qualified domain name you want to use for your Actual Budget server. This can either be the same value as your DuckDNS subdomain (i.e. "example.duckdns.org"), or a subsite within it (i.e. "budget.example.duckdns.org")
         * billing_account_name = "your_billing_account_name" - This defaults to "My Billing Account", so this only needs defined if your billing account name is something else.
@@ -73,6 +72,10 @@ Some notes about the architecture of this setup:
         * billing_alert_amount = "the_amount_you_want" - This isn't really a sensitive variable, but to simply things, we can put it in the same ".auto.tfvars" file. This defaults to "5", so this only needs defined if you want to set a different billing alert threshold.
         * duckdns_subdomains = "your_subdomain" - Values captured in Step #1.
         * duckdns_token = "your_duckdns_token" - Values captured in Step #1.
+        * gcp_billing_project_name = The name of your GCP billing project. This may be the same as your GCP project.
+        * gcp_project_name = The name of your GCP project.
+        * gcp_region = The GCP region you wish your workload to run in (for example, us-central1). Keep in mind [only certain regions are eligible for the always-free Compute Engine instance][3].
+        * gcp_zone = The zone within the GCP region you want to use (for example, us-central1-c).
         * public_key_path - The path on your local machine to the SSH public key that was generated in Step #2 (if it was named something other than the default value defined in `compute-variables.tf`)
         * user = "your_google_username" - It should be your Google username without the "@gmail.com". If you use the SSH proxy to login from the GCP console, it will log you in automatically as this user.
         * **Note** - The `.gitignore` file is configured to ignore any *.auto.tfvars files. Be extremely cautious with what variable values you allow to be pushed to your source control (Git) repository.
@@ -108,3 +111,18 @@ Some notes about the architecture of this setup:
 16. Open your web browser and navigate to the fully-qualified domain name you set for the value of the "actual_fqdn" variable (i.e. ht<span>tps://</span>budget.example.duckdns.org). You should see the Actual Budget login page. You're now ready to setup your budget. Follow [Actual Budget's Getting Started][17] page for next steps.
     * ![Actual Budget login](./readme_resources/actual_login_page.png)
 
+## Updating Actual Server
+There are a couple of ways you could use to try to update Actual Server to a newer version.
+
+1. Re-run `terraform apply`. If a newer version of the Google Container Optimized OS image has been published, the virtual machine will be destroyed and re-deployed, pulling the latest version of the actualbudget/actual-server container during the re-deploy.
+2. If you want to manually trigger an update, you can perform the following steps:
+    * SSH into the virtual machine.
+        * ![GCP Console SSH](./readme_resources/ssh_vm.png)
+    * Issue the following commands:
+        ```
+        docker pull actualbudget/actual-server:latest
+        sudo systemctl restart actual
+        ```
+        * ![Manual update container](./readme_resources/update_container.png)
+    * Your server should now reflect the most recent version.
+        * ![Version check](./readme_resources/actual_update.png)
