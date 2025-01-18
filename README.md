@@ -45,25 +45,25 @@ Some notes about the architecture of this setup:
     * ![HCP Terraform New Workspace](./readme_resources/hcp_tf_new_workspace.png)
 3. Within your workspace, navigate to Settings > General and scroll down to Execution Mode. Set it to "Local (Custom)". This will ensure that you can execute Terraform commands at the command line. By default, the workspace will be set to your Organization Default, which may already be set to Local. If your Organization Default is Local, you don't necessarily need to force the workspace to Local, but it also won't hurt to do so. Additionally, if you are deviating from these instructions and opting to choose to run Terraform within HCP Terraform and not on your local machine, you can ignore this step and select your desired Execution Mode for your custom setup.
     * ![HCP Terraform Execution Mode](./readme_resources/hcp_tf_execution_mode.png)
-3. *Optional* - Run the following command to create an SSH public/private key-pair (if on Windows, you may need to [install Git][15] first):
+4. *Optional* - Run the following command to create an SSH public/private key-pair (if on Windows, you may need to [install Git][15] first):
     * `ssh-keygen`
     * **Note** - This will be used for SSH key-pair authentication when connecting directly, without the use of the Google SSH proxy. This configuration disables direct SSH access by default, though a firewall rule does get created to allow it. It is included in case short-term "break glass" / emergency access is needed.
-4. Clone this repository to your machine (or create a fork and clone your fork) and open a terminal session into the repository's directory.
-5. Run the following command to initialize your Google Cloud command line tools: 
+5. Clone this repository to your machine (or create a fork and clone your fork) and open a terminal session into the repository's directory.
+6. Run the following command to initialize your Google Cloud command line tools: 
     * `gcloud init`
-6. Run the following command to make your user credentials available to Application Default Credentials (ADC):
+7. Run the following command to make your user credentials available to Application Default Credentials (ADC):
     * `gcloud auth application-default login`
-7. Run the following command to enable the API services necessary for Terraform to run and configure the rest of the environment:
+8. Run the following command to enable the API services necessary for Terraform to run and configure the rest of the environment:
     * `gcloud services enable cloudresourcemanager.googleapis.com`
-8. If this is a new Google Cloud environment, I recommend running the following commands to delete the default networking configuration, as new configurations will be deployed via Terraform:
+9. If this is a new Google Cloud environment, I recommend running the following commands to delete the default networking configuration, as new configurations will be deployed via Terraform:
     * `gcloud compute firewall-rules list`
     * For each firewall rule listed, run `gcloud compute firewall-rules delete rulename`
     * `gcloud compute networks delete default`
     * If you already have resources active using the default VPC, skip this step and update the Terraform code to remove the new 'google_compute_network' and 'google_compute_route' resources, as well as modifying the network for the 'google_compute_firewall' and 'google_compute_instance' resources.
     * Deleting the default network and using a custom network helps align with [documented best-practices regarding VPC design][13].
-9. We're now ready to begin configuring our local Terraform environment. Run the following command to [authenticate with HCP Terraform][14]:
+10. We're now ready to begin configuring our local Terraform environment. Run the following command to [authenticate with HCP Terraform][14]:
     * `terraform login`
-10. Make the following updates to the following files in the repository:
+11. Make the following updates to the following files in the repository:
     * Update `backend.tf` with your organization and workspace names from HCP Terraform.
     * Create a file named `sensitive.auto.tfvars` and create the following variables:
         * actual_fqdn - The fully-qualified domain name you want to use for your Actual Budget server. This can either be the same value as your DuckDNS subdomain (i.e. "example.duckdns.org"), or a subsite within it (i.e. "budget.example.duckdns.org")
@@ -83,13 +83,13 @@ Some notes about the architecture of this setup:
         * **Note** - The `.gitignore` file is configured to ignore any *.auto.tfvars files. Be extremely cautious with what variable values you allow to be pushed to your source control (Git) repository.
         * **Note** - You could also define these variables within HCP Terraform if you want to have your Terraform actions performed there instead of your local command line.
         * ![Example Variables](./readme_resources/variable_values.png)
-11. Run the following command to initiate Terraform:
+12. Run the following command to initiate Terraform:
     *  `terraform init`
-12. Run the following command to execute a "plan" operation, where we can inspect what Terraform operations are expected to happen when the "apply" operation happens:
+13. Run the following command to execute a "plan" operation, where we can inspect what Terraform operations are expected to happen when the "apply" operation happens:
     *  `terraform plan`
-13. Once you've reviewed the output of the "plan" operation and are ready to deploy the infrastructure, run the following command and confirm when prompted:
+14. Once you've reviewed the output of the "plan" operation and are ready to deploy the infrastructure, run the following command and confirm when prompted:
     * `terraform apply`
-14. *Optional* - Post-deployment validation:
+15. *Optional* - Post-deployment validation:
     * Once the "apply" operation has completed, navigate to the Google Cloud web console and inspect the new virtual machine.
         * ![Provisioned VM](./readme_resources/gcp_post_deployment.png)
     * **Note** - You can also run the following Google Cloud command to validate the new virtual machine:
