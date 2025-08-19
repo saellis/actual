@@ -1,10 +1,10 @@
 terraform {
   cloud {
 
-    organization = "your-organization"
+    organization = "rock-dog"
 
     workspaces {
-      name = "your-workspace"
+      name = "actual"
     }
   }
 }
